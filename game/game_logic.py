@@ -99,16 +99,17 @@ def play_game(game):
     cards_per_player = 6 if num_players < 6 else 5
     main_deck = game.main_deck
     special_deck = game.special_deck
-    is_player_active = dict()
+    '''is_player_active = dict()
     for player in game.players:
         is_player_active[player] = True 
-    players = [player for player in is_player_active.keys() if is_player_active[player]]
+    players = [player for player in is_player_active.keys() if is_player_active[player]]'''
+    players = game.active_players
     
     # Initial deal
     refill_hands_repeat(game, players, cards_per_player)
 
     print("\n🧦 Game Start! 🧦")
-    print_game_state(game)
+    game.print_game_state()
 
     while game.active:
         current = players[game.current_player_index]
@@ -118,7 +119,7 @@ def play_game(game):
         # Current player draws from its neighbor
         print(f"\n{current.name}'s turn. Drawing from {target.name}...")
         draw_card_from_player(current, target)
-        print_game_state(game)
+        game.print_game_state()
 
         # Check for pairs for current player
         if check_for_pairs([current]):
@@ -150,11 +151,11 @@ def play_game(game):
         # End turn checks
         for player in rotate_list(players, game.current_player_index):
             if player.is_hand_empty():
-                is_player_active[player] = False
+                players.remove(player)
                 print(f"{player.name} has won")
 
         # Check for endgame
-        players = [player for player in is_player_active.keys() if is_player_active[player]]
+        # players = [player for player in is_player_active.keys() if is_player_active[player]]
         if len(players) == 1:
             last = players[0]
             print(f"\n💩 {last.name} is left with the Stinky Sock! He loses.")
@@ -162,7 +163,7 @@ def play_game(game):
             break
 
         # Advance turn
-        game.next_player(is_player_active)
+        game.next_player()
         print(f"---------- NEXT ROUND ----------")
 
 
@@ -191,7 +192,7 @@ def refill_hands(players, cards_per_player, deck):
 
 
 def refill_hands_repeat(game, players, cards_per_player):
-    print_game_state(game)
+    game.print_game_state()
     while not game.main_deck.is_empty() and players:
         print(f"Refilling the hand of {[player.name for player in players]}")
         refill_hands(players, cards_per_player, game.main_deck)
@@ -204,14 +205,6 @@ def refill_hands_repeat(game, players, cards_per_player):
         players = another_round
 
 
-def print_game_state(game):
-    print(f'Main deck: {game.main_deck.count()}')
-    print(f'Active players: {[player.name for player in game.players]}')
-    for player in game.players:
-        print(f'{player.name} has {len(player.hand)} cards.')
-        print(f'{player.name} hand: {player.hand}')
-
-
 def activate_special_card(game, current_player, name):
     match name:
         case "Birthday":
@@ -221,7 +214,7 @@ def activate_special_card(game, current_player, name):
 
 
 def activate_birthday(game, current_player):
-    other_players = game.players.copy()
+    other_players = game.active_players.copy()
     other_players.remove(current_player)
     for player in other_players:
         give_card_to_player(current_player, player)
