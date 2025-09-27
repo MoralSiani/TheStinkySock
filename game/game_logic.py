@@ -14,12 +14,16 @@ def draw_card_from_player(receiver, giver):
 
         print(f"\n{giver.name} has {len(giver.hand)} cards.")
         print(f"{receiver.name}, pick a number between 1 and {len(giver.hand)} to draw a card.")
-        try:
-            choice = int(input("Pick a card position: ")) - 1
-            if not 0 <= choice < len(giver.hand):
-                print("Invalid number. Try again.")
-        except ValueError:
-            print("Please enter a valid number.")
+        while True:
+            try:
+                choice = int(input("Pick a card position: ")) - 1
+            except ValueError:
+                print("Please enter a valid number.")
+            else:
+                if not 0 <= choice < len(giver.hand):
+                    print("Invalid number. Try again.")
+                else:
+                    break
     else:
         choice = random.randint(0, len(giver.hand) - 1)
 
@@ -43,12 +47,16 @@ def give_card_to_player(receiver, giver):
             print(f"{idx}. {card}")
 
         print(f"{giver.name}, pick a number between 1 and {len(giver.hand)} to pick a card.")
-        try:
-            choice = int(input("Pick a card position in your hand: ")) - 1
-            if not 0 <= choice < len(giver.hand):
-                print("Invalid number. Try again.")
-        except ValueError:
-            print("Please enter a valid number.")
+        while True:
+            try:
+                choice = int(input("Pick a card position in your hand: ")) - 1
+            except ValueError:
+                print("Please enter a valid number.")
+            else:
+                if not 0 <= choice < len(giver.hand):
+                    print("Invalid number. Try again.")
+                else:
+                    break
     elif giver.is_stinky_in_hand():
         choice = giver.get_position_of_card_in_hand_by_type("stinky")
     else:
@@ -130,7 +138,7 @@ def play_game(game):
             print_game_state(game)'''
             affected_players = [current, target]
         else:
-            if num_players > 2:
+            if len(game.active_players) > 2:
                 special_card = special_deck.draw()
                 print(f"{current.name} has no pairs.\nThe card {special_card.name} has been drawn from the special deck")
                 activate_special_card(game, current, special_card.name)
@@ -205,6 +213,11 @@ def refill_hands_repeat(game, players, cards_per_player):
         players = another_round
 
 
+#########################################
+###########   Special cards   ###########
+#########################################
+
+
 def activate_special_card(game, current_player, name):
     match name:
         case "Birthday":
@@ -219,4 +232,8 @@ def activate_birthday(game, current_player):
     for player in other_players:
         give_card_to_player(current_player, player)
     check_for_pairs([current_player])
+
+
+def activate_bruise(game, current_player):
+    pass
 
